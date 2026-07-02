@@ -1,16 +1,11 @@
 import express from 'express';
-import cors from 'cors';
+import { requestLogger } from './middleware/logger';
+import userRoutes from './routes/userRoutes';
 
 const app = express();
 app.use(express.json());
-app.use(cors());
+app.use(requestLogger);
 
-const PORT = process.env.PORT || 3000;
+app.use('/api/users', userRoutes);
 
-app.get('/status', (req, res) => {
-    res.json({ status: 'API_OPERATIONAL', timestamp: new Date().toISOString() });
-});
-
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
+app.listen(3000, () => console.log('Backend active on port 3000'));
