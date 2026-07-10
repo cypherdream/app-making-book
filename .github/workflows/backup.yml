@@ -21,7 +21,7 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: bash backend/scripts/backup.sh
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: db-backup-${{ github.run_id }}
           path: backend/backups/*.sql.gz
