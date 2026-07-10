@@ -1,0 +1,17 @@
+{
+  "search_placeholder": "Tafuta (bonyeza / )",
+  "sign_in": "Ingia ili kusawazisha",
+  "sign_out": "Toka",
+  "saves_automatically": "Inahifadhi kiotomatiki",
+  "save_failed": "Kuhifadhi kumeshindikana",
+  "mark_complete": "Weka somo kama limekamilika",
+  "marked_complete": "Imekamilika",
+  "previous": "Iliyotangulia",
+  "next": "Ifuatayo",
+  "download_certificate": "Pakua cheti",
+  "keyboard_shortcuts": "Njia za mkato za kibodi",
+  "topics_not_in_repo": "Mada zisizo katika hifadhi hii",
+  "no_lessons_match": "Hakuna somo linalolingana na utafutaji wako.",
+  "your_notes": "Maelezo yako (yanahifadhiwa kiotomatiki)",
+  "exit_reading_mode": "Toka katika hali ya kusoma"
+}

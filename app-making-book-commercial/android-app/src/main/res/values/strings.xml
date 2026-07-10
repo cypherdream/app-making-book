@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">App Making Book</string>
+    <string name="status_loading">Running diagnostics…</string>
+    <string name="status_error">Diagnostic failed: %1$s</string>
+</resources>

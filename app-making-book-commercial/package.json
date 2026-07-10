@@ -1,0 +1,19 @@
+{
+  "name": "app-making-book-commercial",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Root package — only for repo-wide tooling (git hooks, commit linting). backend/ and web-learning-app/ are independent projects with their own package.json/node_modules.",
+  "devDependencies": {
+    "husky": "^9.1.5",
+    "lint-staged": "^15.2.9",
+    "@commitlint/cli": "^19.4.1",
+    "@commitlint/config-conventional": "^19.4.1"
+  },
+  "scripts": {
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "backend/src/**/*.ts": "npx --prefix backend eslint --fix",
+    "web-learning-app/src/**/*.{js,jsx}": "npx --prefix web-learning-app eslint --fix"
+  }
+}

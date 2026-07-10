@@ -1,0 +1,28 @@
+# Free, scheduled database backup using GitHub Actions — an actual
+# working backup strategy, not just a script sitting unused. Backup
+# files are uploaded as workflow artifacts (kept 14 days on GitHub's
+# free tier) — for longer retention, add a step pushing to your own
+# free-tier cloud storage (Backblaze B2 has a free 10GB tier).
+name: Database backup
+
+on:
+  schedule:
+    - cron: '0 3 * * *'   # daily at 03:00 UTC
+  workflow_dispatch:
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install postgresql-client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Run backup
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: bash backend/scripts/backup.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: db-backup-${{ github.run_id }}
+          path: backend/backups/*.sql.gz
+          retention-days: 14

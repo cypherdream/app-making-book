@@ -1,0 +1,23 @@
+# Free automated dependency vulnerability scanning. Not a substitute
+# for a real penetration test (which finds logic/design flaws a
+# scanner can't), but catches known CVEs in dependencies automatically
+# and continuously, which is genuinely free and something most small
+# projects skip until it's a problem.
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/backend"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: "npm"
+    directory: "/web-learning-app"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"

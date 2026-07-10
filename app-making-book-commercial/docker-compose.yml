@@ -1,0 +1,49 @@
+# Local development only — for real deployment use the free-tier
+# services in DEPLOY_FREE.md (Render/Neon/Vercel), not this compose
+# file. This exists so you can run the full stack (DB + backend + web
+# app) on your own machine with one command: docker compose up
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: appuser
+      POSTGRES_PASSWORD: apppass
+      POSTGRES_DB: app_making_book
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U appuser"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://appuser:apppass@db:5432/app_making_book
+      JWT_SECRET: local-dev-secret-do-not-use-in-production
+      CLIENT_ORIGIN: http://localhost:8080
+      PORT: 3000
+      NODE_ENV: development
+    ports:
+      - "3000:3000"
+
+  web:
+    build: ./web-learning-app
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "8080:80"
+
+volumes:
+  db-data:

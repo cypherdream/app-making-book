@@ -1,0 +1,14 @@
+{
+  "id": "server",
+  "track": "backend",
+  "title": "The Express server's startup order",
+  "time": "6 min",
+  "objective": "Understand why server.ts mounts things in a specific order, and what broke before it did.",
+  "diagram": ["initSocket(httpServer)", "cors + express.json + requestLogger", "app.use('/api/auth', ...)", "app.use('/api/users', ...)", "app.use('/api/logs', ...)", "errorHandler (must be last)"],
+  "body": [
+    { "h": "The bug this fixes", "p": "The route files existed but were never passed to app.use(...) — so /api/users and /api/logs returned 404 no matter what." },
+    { "h": "Why errorHandler goes last", "p": "Express checks middleware in registration order. An error-handling middleware (4 parameters) only catches errors from routes registered before it." }
+  ],
+  "code": { "filename": "server.ts", "text": "const app = express();\nconst httpServer = createServer(app);\n\ninitSocket(httpServer);\n\napp.use(cors({ origin: process.env.CLIENT_ORIGIN ?? '*' }));\napp.use(express.json());\napp.use(requestLogger);\n\napp.use('/api/auth', authRoutes);\napp.use('/api/users', userRoutes);\napp.use('/api/logs', logRoutes);\n\napp.use(errorHandler);" },
+  "quiz": { "q": "What would happen if errorHandler were registered before the routes?", "options": ["Nothing different", "It would never catch errors from those routes, since it only sees requests that reach it in order", "The server would crash on startup", "Routes would run twice"], "correct": 1 }
+}

@@ -1,0 +1,23 @@
+# Free automated dynamic security scan using OWASP ZAP (open source,
+# widely used, the same engine behind many commercial DAST tools).
+# This is different from `npm audit` (which only checks known
+# dependency CVEs) — ZAP actually sends requests to the running app
+# and looks for real vulnerabilities (missing security headers,
+# reflected input, etc.). Still not equivalent to a human penetration
+# test, which tests business logic a scanner can't understand.
+name: OWASP ZAP baseline scan
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 4 * * 1'   # weekly, Monday 04:00 UTC
+
+jobs:
+  zap-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: ZAP Baseline Scan
+        uses: zaproxy/action-baseline@v0.12.0
+        with:
+          target: ${{ secrets.BACKEND_HEALTH_URL }}
+          fail_action: false  # report findings without blocking — review manually before flipping this to true

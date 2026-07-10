@@ -1,0 +1,14 @@
+{
+  "id": "socket",
+  "track": "backend",
+  "title": "Socket.io: real-time log events",
+  "time": "5 min",
+  "objective": "See how a new log reaches every connected client instantly, without polling.",
+  "diagram": ["POST /api/logs", "prisma.log.create()", "getIO().emit('security_alert', log)", "every connected client"],
+  "body": [
+    { "h": "Why not just poll every few seconds", "p": "Polling means every client repeatedly asks 'anything new?' even when nothing changed. A socket connection lets the server push the moment something happens." },
+    { "h": "The bug this fixes", "p": "logRoutes.ts used to import io directly from server.ts, while server.ts imported logRoutes.ts — a circular import that broke at startup. Both now import a shared instance from socket.ts." }
+  ],
+  "code": { "filename": "socket.ts", "text": "let io = null;\nexport const initSocket = (httpServer) => {\n    io = new Server(httpServer, { cors: { origin: process.env.CLIENT_ORIGIN } });\n    return io;\n};\nexport const getIO = () => {\n    if (!io) throw new Error('initSocket() was not called yet');\n    return io;\n};" },
+  "quiz": { "q": "What was the original circular import bug?", "options": ["Two files exporting the same name", "logRoutes.ts imported io from server.ts, while server.ts imported logRoutes.ts", "socket.io wasn't installed", "The port was already in use"], "correct": 1 }
+}

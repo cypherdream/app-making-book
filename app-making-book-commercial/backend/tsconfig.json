@@ -1,0 +1,53 @@
+{
+  // Visit https://aka.ms/tsconfig to read more about this file
+  "compilerOptions": {
+    // File Layout
+    "rootDir": "./src",
+    "outDir": "./dist",
+
+    // Environment Settings
+    // See also https://aka.ms/tsconfig/module
+    // "nodenext" was set here before, but package.json declares
+    // "type": "commonjs" — nodenext + verbatimModuleSyntax requires
+    // plain import/export syntax to only appear in files Node treats
+    // as ESM, which none of these are. "commonjs" matches what this
+    // package actually is.
+    "module": "commonjs",
+    "target": "esnext",
+    // "types": [] previously excluded ALL ambient type packages,
+    // including @types/node — that silently breaks typings for
+    // process.env, Buffer, etc. even though @types/node is installed.
+    "types": ["node"],
+    "lib": ["esnext"],
+
+    // Other Outputs
+    "sourceMap": true,
+    "declaration": true,
+    "declarationMap": true,
+
+    // Stricter Typechecking Options
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+
+    // Style Options
+    // "noImplicitReturns": true,
+    // "noImplicitOverride": true,
+    // "noUnusedLocals": true,
+    // "noUnusedParameters": true,
+    // "noFallthroughCasesInSwitch": true,
+    // "noPropertyAccessFromIndexSignature": true,
+
+    // Recommended Options
+    "strict": true,
+    // verbatimModuleSyntax previously conflicted with "module": "commonjs":
+    // it requires import/export syntax to pass through untransformed,
+    // but commonjs output rewrites import/export into require()/exports,
+    // so every file with a top-level import/export failed to compile.
+    "isolatedModules": true,
+    "noUncheckedSideEffectImports": true,
+    "moduleDetection": "force",
+    "skipLibCheck": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}

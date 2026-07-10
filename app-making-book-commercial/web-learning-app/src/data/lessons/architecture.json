@@ -1,0 +1,14 @@
+{
+  "id": "architecture",
+  "track": "android",
+  "title": "How the whole app fits together",
+  "time": "5 min",
+  "objective": "See the full path a tap takes, from the Android screen to Postgres and back.",
+  "diagram": ["MainActivity", "MainViewModel", "UserRepository", "ApiService (Retrofit)", "Express routes", "Prisma", "PostgreSQL"],
+  "body": [
+    { "h": "What this is", "p": "The repo is two separate programs that talk over HTTP: an Android app (Kotlin) and a backend server (Node/TypeScript). Neither can 'see' the other's code — they only communicate through JSON requests." },
+    { "h": "Why split them at all", "p": "The phone can't safely hold a database password or business logic that every user would need updated at once. The server holds the source of truth; the phone holds the UI and a local cache for offline use." },
+    { "h": "Where a request starts", "p": "When MainActivity appears on screen, it asks MainViewModel to load data. The ViewModel asks UserRepository, which decides whether to use the local Room cache or call the network." }
+  ],
+  "quiz": { "q": "Why doesn't the Android app talk directly to PostgreSQL?", "options": ["Kotlin can't run SQL", "The phone would need database credentials, which isn't safe to ship in an app", "PostgreSQL only accepts JavaScript clients", "It's slower that way"], "correct": 1 }
+}

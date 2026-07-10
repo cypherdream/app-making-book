@@ -1,0 +1,18 @@
+{
+  "id": "retrofit",
+  "track": "android",
+  "title": "Retrofit: calling the backend",
+  "time": "6 min",
+  "objective": "See how ApiService turns Kotlin function calls into real HTTP requests.",
+  "diagram": ["ApiService interface", "Retrofit (generates implementation)", "OkHttp (sends the request)", "Backend"],
+  "body": [
+    { "h": "What this is", "p": "ApiService is just an interface with no method bodies. Retrofit reads the annotations (@GET, @POST) and generates a real implementation at runtime." },
+    { "h": "Where BASE_URL comes from", "p": "NetworkModule reads BuildConfig.BASE_URL, set per build type in build.gradle.kts — debug points at 10.0.2.2 (the emulator's alias for your computer), release points at your deployed server." }
+  ],
+  "code": { "filename": "ApiService.kt", "text": "interface ApiService {\n    @GET(\"../health\")\n    suspend fun getSystemStatus(): HealthResponse\n\n    @POST(\"logs\")\n    suspend fun postSecurityLog(@Body log: LogRequest): LogResponse\n}" },
+  "lineNotes": [
+    "suspend fun — this call pauses without blocking the UI thread.",
+    "@Body log: LogRequest — serialized to JSON automatically and sent as the request body."
+  ],
+  "quiz": { "q": "Why is ApiService just an interface with no method bodies?", "options": ["It's unfinished code", "Retrofit generates the real networking implementation from the annotations at runtime", "Kotlin requires interfaces for all classes", "It's faster to compile"], "correct": 1 }
+}

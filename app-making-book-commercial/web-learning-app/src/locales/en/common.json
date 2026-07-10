@@ -1,0 +1,17 @@
+{
+  "search_placeholder": "Search (press / )",
+  "sign_in": "Sign in to sync",
+  "sign_out": "Sign out",
+  "saves_automatically": "Saves automatically",
+  "save_failed": "Save failed",
+  "mark_complete": "Mark lesson complete",
+  "marked_complete": "Marked complete",
+  "previous": "Previous",
+  "next": "Next",
+  "download_certificate": "Download certificate",
+  "keyboard_shortcuts": "Keyboard shortcuts",
+  "topics_not_in_repo": "Topics not in this repo",
+  "no_lessons_match": "No lessons match your search.",
+  "your_notes": "Your notes (saved automatically)",
+  "exit_reading_mode": "Exit reading mode"
+}

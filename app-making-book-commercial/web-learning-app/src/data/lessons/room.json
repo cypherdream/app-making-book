@@ -1,0 +1,19 @@
+{
+  "id": "room",
+  "track": "android",
+  "title": "Room: the local database",
+  "time": "6 min",
+  "objective": "See how UserDao and AppDatabase give the app offline storage.",
+  "diagram": ["UserRepository", "UserDao (interface)", "AppDatabase (Room)", "SQLite file on the phone"],
+  "body": [
+    { "h": "What this is", "p": "Room wraps SQLite, Android's built-in on-device database. You write an interface describing queries; Room generates the SQL-executing code at build time." },
+    { "h": "Why it exists", "p": "Without it, every screen reload would need a fresh network call. Room lets the app show something instantly from cache, then update once the network call returns." }
+  ],
+  "code": { "filename": "UserDao.kt", "text": "@Dao\ninterface UserDao {\n    @Query(\"SELECT * FROM users ORDER BY timestamp DESC\")\n    fun getAllUsers(): Flow<List<UserEntity>>\n\n    @Insert(onConflict = OnConflictStrategy.REPLACE)\n    suspend fun upsertAll(users: List<UserEntity>)\n}" },
+  "lineNotes": [
+    "@Dao — marks this interface for Room's code generator.",
+    "Flow<List<UserEntity>> — a live stream: the UI updates automatically whenever the table changes.",
+    "OnConflictStrategy.REPLACE — overwrite an existing row with the same id instead of crashing."
+  ],
+  "quiz": { "q": "Why does getAllUsers() return a Flow instead of a plain List?", "options": ["Flow is required by Kotlin", "So the UI updates live whenever the underlying data changes", "It's faster to type", "Flow is a network type"], "correct": 1 }
+}

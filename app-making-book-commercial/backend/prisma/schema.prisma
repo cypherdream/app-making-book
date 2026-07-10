@@ -1,0 +1,190 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                Int       @id @default(autoincrement())
+  name              String
+  email             String    @unique
+  passwordHash      String
+  isAdmin           Boolean   @default(false)
+  // Bumped on password change or "sign out everywhere". Every JWT
+  // carries the tokenVersion it was issued with; requireAuth rejects
+  // any token whose version doesn't match the current one — this is
+  // what makes an otherwise-stateless JWT revocable.
+  tokenVersion      Int       @default(0)
+  createdAt         DateTime  @default(now())
+  // Failed-login lockout: incremented on bad password, reset on
+  // success. lockedUntil blocks login attempts entirely while set.
+  failedLoginCount  Int       @default(0)
+  lockedUntil       DateTime?
+  // Premium/subscription status, set by the Stripe webhook — never
+  // trust a client to tell us its own subscription is active.
+  isPremium         Boolean   @default(false)
+  stripeCustomerId  String?   @unique
+  // TOTP-based 2FA (Google Authenticator-compatible). Secret is only
+  // ever set after the user confirms a valid code during setup, so a
+  // half-finished setup can't leave an account in a broken state.
+  totpSecret        String?
+  totpEnabled       Boolean   @default(false)
+  // Email verification — set once, cleared once verified. A user can
+  // still log in without verifying (that's a product decision you may
+  // want to change), but the code checks this flag where you gate
+  // features behind "verified" status.
+  emailVerified     Boolean   @default(false)
+  emailVerifyToken  String?   @unique
+  emailVerifyExpiry DateTime?
+  // Password reset — token is only ever valid once and expires in 1 hour.
+  resetToken        String?   @unique
+  resetTokenExpiry  DateTime?
+  logs              Log[]
+  progress          Progress?
+  auditLogs         AuditLog[]
+  pushSubscriptions PushSubscription[]
+  analyticsEvents   AnalyticsEvent[]
+  sessions          Session[]
+}
+
+model Log {
+  id      Int    @id @default(autoincrement())
+  message String
+  userId  Int
+  user    User   @relation(fields: [userId], references: [id])
+}
+
+model Progress {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @unique
+  data      Json
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+// Lessons now live in the database instead of only static JSON files,
+// so the admin CMS can create/edit/publish without a code deploy. The
+// Vite app's data/lessons.js can fall back to the bundled JSON if this
+// table is empty (e.g. running fully offline/local).
+model Lesson {
+  id         String   @id            // matches the JSON "id" field, e.g. "architecture"
+  track      String
+  title      String
+  time       String
+  objective  String
+  content    Json     // { diagram, body, code, lineNotes, quiz }
+  published  Boolean  @default(true)
+  order      Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+// Every admin action (publish/unpublish a lesson, ban a user, etc.)
+// gets one row here — who did what, to what, and when. Immutable by
+// design: nothing in this API ever updates or deletes an AuditLog row.
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  actorId   Int
+  actor     User     @relation(fields: [actorId], references: [id])
+  action    String   // e.g. "lesson.publish", "user.ban"
+  targetId  String?  // id of whatever was acted on
+  metadata  Json?
+  createdAt DateTime @default(now())
+}
+
+// Self-hosted analytics: one row per meaningful event. Coarse and
+// simple on purpose — enough to answer "what's read, what's dropped,
+// what's completed" without standing up a third-party analytics SaaS.
+model AnalyticsEvent {
+  id        Int      @id @default(autoincrement())
+  userId    Int?
+  user      User?    @relation(fields: [userId], references: [id])
+  type      String   // "lesson_view" | "lesson_complete" | "quiz_answer" | "client_error"
+  lessonId  String?
+  metadata  Json?
+  createdAt DateTime @default(now())
+}
+
+// One row per issued refresh token — this is what makes "session
+// management" and "device management" possible. tokenVersion alone
+// (used elsewhere) can only revoke ALL sessions at once; this table
+// lets a user see and revoke ONE device without logging out
+// everywhere else.
+model Session {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id])
+  deviceLabel String   // derived from User-Agent, e.g. "Chrome on Android"
+  ipAddress   String?
+  createdAt   DateTime @default(now())
+  lastUsedAt  DateTime @default(now())
+  revokedAt   DateTime?
+}
+
+// One row per rate-limit rejection — lets the admin dashboard show
+// "what's being hit and from where" instead of rate limiting being an
+// invisible wall with no visibility into who's tripping it.
+model RateLimitHit {
+  id        Int      @id @default(autoincrement())
+  route     String
+  ipAddress String
+  createdAt DateTime @default(now())
+}
+
+// Self-ping health history — the free, self-hosted alternative to a
+// paid uptime-monitoring service. A scheduled job (see MONITORING.md)
+// hits /health and records the result here.
+model HealthCheck {
+  id        Int      @id @default(autoincrement())
+  ok        Boolean
+  latencyMs Int
+  createdAt DateTime @default(now())
+}
+
+// Simple database-backed job queue — no Redis/BullMQ dependency
+// needed, so it works on the free tier with nothing extra to set up.
+// Trade-off vs. a real queue: polling-based (see worker.ts), so jobs
+// run within ~10 seconds of being queued, not instantly. Fine for
+// sending a push notification or an email; not for anything latency
+// sensitive.
+model Job {
+  id          Int       @id @default(autoincrement())
+  type        String    // e.g. "send_push", "send_email"
+  payload     Json
+  status      String    @default("pending") // pending | processing | done | failed
+  attempts    Int       @default(0)
+  error       String?
+  createdAt   DateTime  @default(now())
+  processedAt DateTime?
+}
+
+// Free community template sharing — NOT the full "marketplace" from
+// the original spec (no payments, no revenue split, no moderation
+// queue). Those need real business infrastructure this project isn't
+// ready to promise. This is the honest subset: save a spec, make it
+// public, others can browse and use it. See builder/README.md.
+model CommunityTemplate {
+  id            Int      @id @default(autoincrement())
+  name          String
+  description   String
+  spec          Json
+  authorId      Int
+  isPublic      Boolean  @default(false)
+  downloadCount Int      @default(0)
+  createdAt     DateTime @default(now())
+}
+
+// Web Push (VAPID) subscription per device — free, self-hosted
+// alternative to Firebase Cloud Messaging.
+model PushSubscription {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+}

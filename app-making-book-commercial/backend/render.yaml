@@ -1,0 +1,20 @@
+# Render "Blueprint" — connect this repo on render.com and it reads
+# this file to configure the service automatically instead of you
+# clicking through settings by hand. Free instance type, matching
+# Render's free tier (750 hrs/month, sleeps after 15 min idle).
+services:
+  - type: web
+    name: app-making-book-backend
+    runtime: node
+    plan: free
+    buildCommand: npm install && npx prisma generate && npm run build
+    startCommand: node dist/server.js
+    envVars:
+      - key: DATABASE_URL
+        sync: false   # paste your Neon connection string in the Render dashboard
+      - key: JWT_SECRET
+        generateValue: true   # Render generates a random secret for you
+      - key: CLIENT_ORIGIN
+        sync: false   # your deployed frontend URL, once you have it
+      - key: NODE_ENV
+        value: production

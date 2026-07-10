@@ -1,0 +1,56 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Theme tokens. Previously the "dark mode" toggle in the UI changed
+ * state but every color was hardcoded (bg-[#0B0D12], text-white/NN),
+ * so switching it did nothing visible — a real bug, not a stylistic
+ * choice. These variables are what the toggle now actually controls.
+ * Code blocks intentionally stay dark in both themes (like most
+ * editors/docs sites) since syntax-highlight colors are tuned for a
+ * dark background.
+ */
+/* Fallback values on :root (the actual <html> element) so nothing
+   renders with undefined CSS variables during the brief window before
+   the themed wrapper div (which carries the real data-theme value)
+   mounts — e.g. the very first paint of <Skeleton />. Matches the
+   dark theme, since dark is this app's default. */
+:root {
+  --bg-app: #0B0D12;
+  --bg-panel: #0E1016;
+  --bg-input: rgba(255,255,255,0.05);
+  --bg-hover: rgba(255,255,255,0.10);
+  --border: rgba(255,255,255,0.10);
+  --text-primary: rgba(255,255,255,0.90);
+  --text-secondary: rgba(255,255,255,0.65);
+  --text-muted: rgba(255,255,255,0.45);
+}
+
+[data-theme="dark"] {
+  --bg-app: #0B0D12;
+  --bg-panel: #0E1016;
+  --bg-input: rgba(255,255,255,0.05);
+  --bg-hover: rgba(255,255,255,0.10);
+  --border: rgba(255,255,255,0.10);
+  --text-primary: rgba(255,255,255,0.90);
+  --text-secondary: rgba(255,255,255,0.65);
+  --text-muted: rgba(255,255,255,0.45);
+}
+
+[data-theme="light"] {
+  --bg-app: #F7F7F8;
+  --bg-panel: #FFFFFF;
+  --bg-input: rgba(0,0,0,0.04);
+  --bg-hover: rgba(0,0,0,0.06);
+  --border: rgba(0,0,0,0.10);
+  --text-primary: rgba(20,20,24,0.92);
+  --text-secondary: rgba(20,20,24,0.65);
+  --text-muted: rgba(20,20,24,0.48);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in { animation: fadeIn 0.2s ease; }

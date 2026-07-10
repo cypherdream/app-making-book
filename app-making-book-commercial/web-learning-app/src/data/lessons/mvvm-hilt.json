@@ -1,0 +1,22 @@
+{
+  "id": "mvvm-hilt",
+  "track": "android",
+  "title": "MVVM + Hilt: who owns what",
+  "time": "7 min",
+  "objective": "Understand why the code is split into Activity / ViewModel / Repository, and what Hilt is doing.",
+  "diagram": ["MainActivity (draws UI)", "MainViewModel (holds state)", "UserRepository (decides data source)"],
+  "body": [
+    { "h": "The problem this solves", "p": "Without this split, one giant file would fetch data, transform it, and draw the UI all at once — hard to test and hard to change." },
+    { "h": "MainViewModel", "p": "Holds a single UiState value (Loading, Success, or Error) in a StateFlow. The Activity just reacts to whatever state it's given." },
+    { "h": "What Hilt does", "p": "@HiltViewModel and @Inject mean you never write 'MainViewModel(someRepository)' by hand. Hilt builds every dependency automatically." }
+  ],
+  "code": { "filename": "MainViewModel.kt", "text": "@HiltViewModel\nclass MainViewModel @Inject constructor(\n    private val userRepository: UserRepository\n) : ViewModel() {\n    private val _uiState = MutableStateFlow<UiState>(UiState.Loading)\n    val uiState: StateFlow<UiState> = _uiState.asStateFlow()\n\n    fun fetchData() {\n        viewModelScope.launch {\n            _uiState.value = UiState.Loading\n            val result = userRepository.checkBackendStatus()\n            _uiState.value = result.fold(\n                onSuccess = { UiState.Success(it) },\n                onFailure = { UiState.Error(it.message ?: \"Unknown error\") }\n            )\n        }\n    }\n}" },
+  "lineNotes": [
+    "@HiltViewModel — tells Hilt this class needs dependency injection.",
+    "@Inject constructor(...) — Hilt fills in userRepository for you.",
+    "MutableStateFlow — a value that can change over time; the UI observes it and redraws automatically.",
+    "viewModelScope.launch — runs the network call on a background coroutine.",
+    "result.fold(...) — forces you to handle both success and failure."
+  ],
+  "quiz": { "q": "What happens if you delete @Inject from MainViewModel's constructor?", "options": ["Nothing changes", "Hilt no longer knows how to construct MainViewModel, and the app fails to build", "The app runs but ignores the repository", "It becomes faster"], "correct": 1 }
+}

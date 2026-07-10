@@ -1,0 +1,14 @@
+{
+  "id": "prisma",
+  "track": "backend",
+  "title": "Prisma: typed access to Postgres",
+  "time": "6 min",
+  "objective": "See how schema.prisma becomes real TypeScript types, and why we share one client.",
+  "diagram": ["schema.prisma", "npx prisma generate", "@prisma/client (typed)", "prisma.user.findMany()", "PostgreSQL"],
+  "body": [
+    { "h": "What this is", "p": "schema.prisma describes your tables. Running 'npx prisma generate' writes a fully-typed client — queries are type-checked against your actual columns." },
+    { "h": "The bug this fixes", "p": "Every route file used to run 'new PrismaClient()' on its own, each opening its own connection pool. Now every file imports one shared instance from prisma.ts." }
+  ],
+  "code": { "filename": "prisma.ts", "text": "import { PrismaClient } from '@prisma/client';\n\nexport const prisma = new PrismaClient();" },
+  "quiz": { "q": "Why share one PrismaClient instance across the app?", "options": ["It looks cleaner", "Each instance opens its own database connection pool; many instances waste connections", "PrismaClient can only be created once per process by law", "It makes queries faster individually"], "correct": 1 }
+}
