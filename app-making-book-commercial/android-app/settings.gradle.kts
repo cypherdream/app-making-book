@@ -14,4 +14,3 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "app-making-book"
-include(":app")
